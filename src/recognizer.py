@@ -7,7 +7,7 @@ import os
 MODEL_FILE = r'models\ml\pca_model.npz'
 WIDTH = 224
 HEIGHT = 224
-RECOGNITION_THRESHOLD = 0.4
+RECOGNITION_THRESHOLD = 0.24
 
 class Recognizer:
     def __init__(self):
@@ -27,8 +27,10 @@ class Recognizer:
         print("Model PCA đã được tải thành công.")
 
     def recognize(self, face_image):
-        face_gray = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
-        face_resized = cv2.resize(face_gray, (WIDTH, HEIGHT))
+        face = cv2.medianBlur(face_image, 3)
+        face_gray = cv2.cvtColor(face, cv2.COLOR_BGR2GRAY)
+        face_gray = cv2.equalizeHist(face_gray)
+        face_resized = cv2.resize(face_gray, (WIDTH, HEIGHT), cv2.INTER_AREA)
         face_flattened = face_resized.flatten().astype(np.float32)
 
         projected_face = self.model['eigenvectors'] @ (face_flattened - self.model['mean'].flatten())
@@ -47,15 +49,18 @@ class Recognizer:
         
         if min_dist < RECOGNITION_THRESHOLD:
             in4 = self.model['maps'][match_label]
-            return in4, min_dist
+            id, name = in4.split('-')
+            return id, name, min_dist
         else:
-            return "Unknown", min_dist
+            return None, "Unknown", min_dist
         
 
 
 
 if __name__ == '__main__':
     from face_detector import detect_faces, crop_face
+    from attendance_checker import check_attended
+    
     recognizer = Recognizer()
     
     cap = cv2.VideoCapture(0)
@@ -82,40 +87,27 @@ if __name__ == '__main__':
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255,0,0), 2)
 
             face_img = crop_face(frame, (x, y, w, h))
-            in4, distance = recognizer.recognize(face_img)
+            id, name, distance = recognizer.recognize(face_img)
             
-            color = (0, 255, 0) if in4 != "Unknown" else (0, 0, 255) 
-            text = f"{in4}"
+            color = (0, 255, 0) if id != None else (0, 0, 255) 
+            text = f"{id}-{name}"
             if distance is not None:
                 text += f" ({distance:.2f})"
             
             cv2.rectangle(frame, (x, y), (x+w, y+h), color, 2)
             cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
 
-            if in4 != "Unknown":
-                id, name = in4.split('-')
-                if prev_id and prev_id == id and id not in attended_list:
-                    count += 1
-                    if count == fps * 2:
-                        attended_list.append(id)
-                        time_maps[id] = str(datetime.now())[:-7]
-                        new_data = {"id": id, "name": name, "attended_at": time_maps[id]}
-
-                        if name not in df['name'].values:
-                            df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
-                            df.to_csv(csv_path, index=False)
-                    elif count < 60: 
-                        cv2.putText(frame, f'{count / fps:.2f}s', (x, y + h + h // 5), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
-                else:
-                    count = 0
-                    prev_id = id
-
-                if id in attended_list:
-                    cv2.putText(frame, f'Attended at {time_maps[id]}', (x - w // 2, y + h + h // 5), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
-            else:
-                continue
-
-        
+        if len(faces_coords) == 1:
+            count, prev_id, attended_list, time_maps, df = check_attended(
+                id, name, 
+                fps, frame,
+                attended_list, time_maps,
+                csv_path, df,
+                prev_id, count,
+                color, 
+                x, y, w, h
+            )
+            
         cv2.imshow("Nhan dang khuon mat - Nhan 'q' de thoat", frame)
         key = cv2.waitKey(1)
         if key & 0xFF == ord('q'):

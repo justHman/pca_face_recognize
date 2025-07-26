@@ -19,3 +19,22 @@ def detect_faces(image):
 def crop_face(image, bbox):
     x, y, w, h = bbox
     return image[y:y+h, x:x+w]
+
+if __name__ == '__main__':
+    cap = cv2.VideoCapture(0)
+
+    while True:
+        
+        ret, frame = cap.read()
+
+        cv2.imshow("Nhan dang khuon mat - Nhan 'q' de thoat", frame)
+
+        key = cv2.waitKey(1)
+        if key & 0xFF == ord('q'):
+            break
+
+        if key == ord('s'):
+            cv2.imwrite('test.jpg', frame)
+
+    cap.release()
+    cv2.destroyAllWindows()

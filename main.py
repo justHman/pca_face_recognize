@@ -2,8 +2,10 @@ import cv2
 import pandas as pd
 from src.face_detector import detect_faces, crop_face
 from src.recognizer import Recognizer
+# from src.attendance_checker import check_attended
 from datetime import datetime
 import os 
+
 
 if __name__ == '__main__':
     recognizer = Recognizer()
@@ -17,6 +19,7 @@ if __name__ == '__main__':
     if os.path.exists(csv_path):
         df = pd.read_csv(csv_path)
         attended_list.extend(df['id'])
+        
         for id, time in zip(df['id'], df['attended_at']):
             time_maps[id] = time
     else:
@@ -32,18 +35,23 @@ if __name__ == '__main__':
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255,0,0), 2)
 
             face_img = crop_face(frame, (x, y, w, h))
-            in4, distance = recognizer.recognize(face_img)
+            id, name, distance = recognizer.recognize(face_img)
             
-            color = (0, 255, 0) if in4 != "Unknown" else (0, 0, 255) 
-            text = f"{in4}"
+            color = (0, 255, 0) if id != None else (0, 0, 255) 
+            if id:
+                text = f"{id}-{name}"
+            else:
+                text = f"{name}"
+
             if distance is not None:
                 text += f" ({distance:.2f})"
             
             cv2.rectangle(frame, (x, y), (x+w, y+h), color, 2)
             cv2.putText(frame, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
 
-            if in4 != "Unknown":
-                id, name = in4.split('-')
+        
+        if len(faces_coords) == 1:
+            if id != None:
                 if prev_id and prev_id == id and id not in attended_list:
                     count += 1
                     if count == fps * 2:
@@ -51,7 +59,7 @@ if __name__ == '__main__':
                         time_maps[id] = str(datetime.now())[:-7]
                         new_data = {"id": id, "name": name, "attended_at": time_maps[id]}
 
-                        if name not in df['name'].values:
+                        if id not in df['id']:
                             df = pd.concat([df, pd.DataFrame([new_data])], ignore_index=True)
                             df.to_csv(csv_path, index=False)
                     elif count < 60: 
@@ -63,9 +71,9 @@ if __name__ == '__main__':
                 if id in attended_list:
                     cv2.putText(frame, f'Attended at {time_maps[id]}', (x - w // 2, y + h + h // 5), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
             else:
-                continue
+                count = 0
+                
 
-        
         cv2.imshow("Nhan dang khuon mat - Nhan 'q' de thoat", frame)
         key = cv2.waitKey(1)
         if key & 0xFF == ord('q'):

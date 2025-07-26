@@ -21,7 +21,6 @@ def train_pca_model():
 
     mean, eigenvectors = cv2.PCACompute(image_matrix, mean=None, retainedVariance=0.98)
     projected_data = cv2.PCAProject(image_matrix, mean, eigenvectors)
-    print(eigenvectors.shape)
 
     model_file = os.path.join(MODEL_PATH, 'pca_model.npz')
     np.savez(
@@ -33,6 +32,9 @@ def train_pca_model():
         maps=maps 
     )
     
+    print("Dataset shape:", image_matrix.shape)
+    print("PC shape (eigenvetors):", eigenvectors.shape)
+    print("Dataset transform shape:", projected_data.shape)
     print(f"Huấn luyện hoàn tất! Model đã được lưu tại: {model_file}")
     print(f"Số lượng người trong model: {len(maps)}")
     return True
