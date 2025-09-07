@@ -46,8 +46,11 @@ pip install -r requirements.txt
 For the easiest setup, use the provided batch script that will guide you through the entire process:
 
 1. **Double-click `setup_and_run.bat`** or run it from command prompt
-2. Follow the on-screen prompts
-3. The script will automatically:
+```bash
+python setup_and_run.bat
+```
+3. Follow the on-screen prompts
+4. The script will automatically:
    - Set up the Python environment
    - Run data collection
    - Train the model
