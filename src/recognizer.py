@@ -55,8 +55,6 @@ class Recognizer:
             return None, "Unknown", min_dist
         
 
-
-
 if __name__ == '__main__':
     from face_detector import detect_faces, crop_face
     from attendance_checker import check_attended

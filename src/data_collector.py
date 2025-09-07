@@ -1,6 +1,6 @@
 import cv2
 import os
-from .face_detector import crop_face, detect_faces
+from face_detector import crop_face, detect_faces
 import time
 
 WIDTH = 224
