@@ -1,4 +1,4 @@
-# Face Recognition System with PCA
+# Face Recognition System with PCA  
 
 A real-time face recognition and attendance system built using OpenCV and Principal Component Analysis (PCA). This system can collect face data, train recognition models, and perform real-time face recognition for attendance tracking.
 
