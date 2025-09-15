@@ -71,7 +71,7 @@ python src/data_collector.py
 - Enter person information in format: `ID-Name` (e.g., `SE194190-Nam`)
 - Look directly at the camera
 - The system will automatically capture 20 face images
-- Press 'q' to quit or 'n' for next person
+- Press 'q' to quit 
 
 #### Step 2: Train the Model
 
