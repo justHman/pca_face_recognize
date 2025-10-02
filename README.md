@@ -3,7 +3,7 @@
 A real-time face recognition and attendance system built using OpenCV and Principal Component Analysis (PCA). This system can collect face data, train recognition models, and perform real-time face recognition for attendance tracking.
 
 ## Features
-
+ 
 - 🎥 Real-time face detection and recognition
 - 📊 PCA-based facial recognition model
 - 📝 Automatic attendance tracking with CSV export
