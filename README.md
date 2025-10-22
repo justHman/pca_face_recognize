@@ -4,7 +4,7 @@ A real-time face recognition and attendance system built using OpenCV and Princi
 
 ## Features
  
-- 🎥 Real-time face detection and recognition 
+- 🎥 Real-time face detection and recognition  
 - 📊 PCA-based facial recognition model
 - 📝 Automatic attendance tracking with CSV export
 - 🖼️ Face data collection and management
